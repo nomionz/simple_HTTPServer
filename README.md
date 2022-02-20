@@ -15,6 +15,6 @@ Build it, run it and then use `curl` to test it out.
 - `curl -X POST http://localhost:4673/workers/John` - will append one completed task to the John
 - Check tasks with `curl http://localhost:4673/workers/John` 
 
-# Feature updates
+# Future updates
 - GET JSON
 - Store the variables to the file
