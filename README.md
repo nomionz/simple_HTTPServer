@@ -12,8 +12,8 @@ Everything is done with the TDD method. That's why in packages you can see some 
 
 # How to use it
 Build it, run it and then use `curl` to test it out.
-- `curl -X POST http://localhost:4637/workers/John` - will append one completed task to the John
-- Check tasks with `curl http://localhost:4637/workers/John` 
+- `curl -X POST http://localhost:4673/workers/John` - will append one completed task to the John
+- Check tasks with `curl http://localhost:4673/workers/John` 
 
 # Feature updates
 - GET JSON
