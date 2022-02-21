@@ -15,7 +15,7 @@ type StubPMStore struct {
 	tasks map[string]int
 	// Detect POST calls
 	doneCalls []string
-	project   []Worker
+	project   Project
 }
 
 func (s *StubPMStore) GetDoneTasks(name string) int {
@@ -26,7 +26,7 @@ func (s *StubPMStore) Append(name string) {
 	s.doneCalls = append(s.doneCalls, name)
 }
 
-func (s *StubPMStore) GetProjectInfo() []Worker {
+func (s *StubPMStore) GetProjectInfo() Project {
 	return s.project
 }
 
@@ -102,7 +102,7 @@ func TestStoreDone(t *testing.T) {
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns JSON on /project", func(t *testing.T) {
-		want := []Worker{
+		want := Project{
 			{"John", 10},
 			{"Steve", 20},
 			{"Martin", 13},
@@ -124,13 +124,13 @@ func TestLeague(t *testing.T) {
 	})
 }
 
-func assertProject(t testing.TB, got, want []Worker) {
+func assertProject(t testing.TB, got, want Project) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
 
-func getProjectInfoFromResponse(t testing.TB, body io.Reader) (project []Worker) {
+func getProjectInfoFromResponse(t testing.TB, body io.Reader) (project Project) {
 	err := json.NewDecoder(body).Decode(&project)
 
 	if err != nil {

@@ -7,7 +7,10 @@ import (
 )
 
 func TestAppendingAndRetrieving(t *testing.T) {
-	srv := NewPMServer(NewInMemoryPMStore())
+	file, rmFile := createTmpFile(t, "")
+	defer rmFile()
+	store := &FSStore{file}
+	srv := NewPMServer(store)
 	worker := "John"
 
 	srv.ServeHTTP(httptest.NewRecorder(), newPostAppendReq(worker))

@@ -17,7 +17,7 @@ type Worker struct {
 type ProjectManagementStore interface {
 	GetDoneTasks(name string) int
 	Append(name string)
-	GetProjectInfo() []Worker
+	GetProjectInfo() Project
 }
 
 type ProjectManagementServer struct {
