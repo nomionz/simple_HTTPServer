@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -12,6 +15,7 @@ type StubPMStore struct {
 	tasks map[string]int
 	// Detect POST calls
 	doneCalls []string
+	project   []Worker
 }
 
 func (s *StubPMStore) GetDoneTasks(name string) int {
@@ -22,12 +26,17 @@ func (s *StubPMStore) Append(name string) {
 	s.doneCalls = append(s.doneCalls, name)
 }
 
+func (s *StubPMStore) GetProjectInfo() []Worker {
+	return s.project
+}
+
 func TestGETPizzas(t *testing.T) {
 	store := StubPMStore{
 		map[string]int{
 			"John":  20,
 			"Steve": 10,
 		},
+		nil,
 		nil,
 	}
 	server := NewPMServer(&store)
@@ -52,7 +61,7 @@ func TestGETPizzas(t *testing.T) {
 		assertResponseBody(t, response.Body.String(), "10")
 	})
 
-	t.Run("returns 404 on missing pizzas", func(t *testing.T) {
+	t.Run("returns 404 on missing tasks", func(t *testing.T) {
 		request := newGetTasksRequest("Benji")
 		response := httptest.NewRecorder()
 
@@ -65,6 +74,7 @@ func TestGETPizzas(t *testing.T) {
 func TestStoreDone(t *testing.T) {
 	store := StubPMStore{
 		map[string]int{},
+		nil,
 		nil,
 	}
 	server := NewPMServer(&store)
@@ -91,17 +101,48 @@ func TestStoreDone(t *testing.T) {
 
 //server_test.go
 func TestLeague(t *testing.T) {
-	store := StubPMStore{}
-	server := NewPMServer(&store)
 
-	t.Run("it returns 200 on /project", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/project", nil)
+	t.Run("it returns JSON on /project", func(t *testing.T) {
+		want := []Worker{
+			{"John", 10},
+			{"Steve", 20},
+			{"Martin", 13},
+		}
+		store := StubPMStore{nil, nil, want}
+		srv := NewPMServer(&store)
+
+		request := newProjectRequest()
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		srv.ServeHTTP(response, request)
 
+		got := getProjectInfoFromResponse(t, response.Body)
 		assertStatus(t, response.Code, http.StatusOK)
+		assertProject(t, got, want)
+		if response.Result().Header.Get("content-type") != "application/json" {
+			t.Errorf("response didn't have json got %v", response.Result().Header)
+		}
 	})
+}
+
+func assertProject(t testing.TB, got, want []Worker) {
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+
+func getProjectInfoFromResponse(t testing.TB, body io.Reader) (project []Worker) {
+	err := json.NewDecoder(body).Decode(&project)
+
+	if err != nil {
+		t.Fatalf("Couldn't parse response from %q into Worker's slice '%v'", body, err)
+	}
+	return
+}
+
+func newProjectRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/project", nil)
+	return req
 }
 
 func newPostAppendReq(name string) *http.Request {

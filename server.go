@@ -1,14 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 )
 
+type Worker struct {
+	Name      string
+	DoneTasks int
+}
+
 type ProjectManagementStore interface {
 	GetDoneTasks(name string) int
 	Append(name string)
+	GetProjectInfo() []Worker
 }
 
 type ProjectManagementServer struct {
@@ -28,7 +35,8 @@ func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
 }
 
 func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("content-type", "application/json")
+	json.NewEncoder(w).Encode(p.store.GetProjectInfo())
 }
 
 func (p *ProjectManagementServer) workersHandler(w http.ResponseWriter, r *http.Request) {

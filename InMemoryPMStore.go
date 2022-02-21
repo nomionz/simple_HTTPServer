@@ -26,3 +26,11 @@ func (i *InMemoryPMStore) GetDoneTasks(name string) int {
 	defer i.lock.RUnlock()
 	return i.store[name]
 }
+
+func (i *InMemoryPMStore) GetProjectInfo() []Worker {
+	var projectInfo []Worker
+	for name, doneTasks := range i.store {
+		projectInfo = append(projectInfo, Worker{name, doneTasks})
+	}
+	return projectInfo
+}
