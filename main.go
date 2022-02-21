@@ -13,6 +13,8 @@ const (
 )
 
 func main() {
+	//O_RDWR|O_CREATE read and write to the file or create if file doesn't exist
+	//0666 - chmod 666 - every user can RW but file isn't executable
 	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
