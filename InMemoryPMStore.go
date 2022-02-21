@@ -15,6 +15,7 @@ func NewInMemoryPMStore() *InMemoryPMStore {
 	}
 }
 
+// Append, GetDoneTasks, GetProjectInfo are functions that implementing the ProjectManagementStore interface
 func (i *InMemoryPMStore) Append(name string) {
 	i.lock.Lock()
 	i.store[name]++

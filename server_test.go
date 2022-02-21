@@ -99,7 +99,6 @@ func TestStoreDone(t *testing.T) {
 	})
 }
 
-//server_test.go
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns JSON on /project", func(t *testing.T) {

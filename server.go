@@ -7,11 +7,13 @@ import (
 	"strings"
 )
 
+// Worker is the struct for JSON
 type Worker struct {
 	Name      string
 	DoneTasks int
 }
 
+// ProjectManagementStore is the interface for PMServer
 type ProjectManagementStore interface {
 	GetDoneTasks(name string) int
 	Append(name string)
@@ -23,6 +25,7 @@ type ProjectManagementServer struct {
 	http.Handler
 }
 
+// NewPMServer takes ProjectManagementStore as a parameter, set up router and return instance of a server
 func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
 	p := new(ProjectManagementServer)
 	p.store = store
@@ -34,11 +37,13 @@ func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
 	return p
 }
 
+// projectHandler handles /project endpoint
 func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(p.store.GetProjectInfo())
 }
 
+// workersHandler handles /workers/ endpoint
 func (p *ProjectManagementServer) workersHandler(w http.ResponseWriter, r *http.Request) {
 	worker := strings.TrimPrefix(r.URL.Path, "/workers/")
 	switch r.Method {
@@ -49,6 +54,7 @@ func (p *ProjectManagementServer) workersHandler(w http.ResponseWriter, r *http.
 	}
 }
 
+// showTasks handler of a GET http request
 func (p *ProjectManagementServer) showTasks(w http.ResponseWriter, worker string) {
 	tasks := p.store.GetDoneTasks(worker)
 	if tasks == 0 {
@@ -57,6 +63,7 @@ func (p *ProjectManagementServer) showTasks(w http.ResponseWriter, worker string
 	fmt.Fprint(w, tasks)
 }
 
+// processAppend handler of a POST http request
 func (p *ProjectManagementServer) processAppend(w http.ResponseWriter, worker string) {
 	p.store.Append(worker)
 	w.WriteHeader(http.StatusAccepted)
