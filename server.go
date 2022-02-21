@@ -12,10 +12,29 @@ type ProjectManagementStore interface {
 }
 
 type ProjectManagementServer struct {
-	store ProjectManagementStore
+	store  ProjectManagementStore
+	router *http.ServeMux
+}
+
+func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
+	p := &ProjectManagementServer{
+		store,
+		http.NewServeMux(),
+	}
+	p.router.Handle("/project", http.HandlerFunc(p.projectHandler))
+	p.router.Handle("/workers/", http.HandlerFunc(p.workersHandler))
+	return p
 }
 
 func (p *ProjectManagementServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p.router.ServeHTTP(w, r)
+}
+
+func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func (p *ProjectManagementServer) workersHandler(w http.ResponseWriter, r *http.Request) {
 	worker := strings.TrimPrefix(r.URL.Path, "/workers/")
 	switch r.Method {
 	case http.MethodPost:

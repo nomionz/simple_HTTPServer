@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	server := &ProjectManagementServer{NewInMemoryPMStore()}
+	server := NewPMServer(NewInMemoryPMStore())
 	log.Fatal(http.ListenAndServe(":4673", server))
 }

@@ -7,8 +7,7 @@ import (
 )
 
 func TestAppendingAndRetrieving(t *testing.T) {
-	store := NewInMemoryPMStore()
-	srv := ProjectManagementServer{store}
+	srv := NewPMServer(NewInMemoryPMStore())
 	worker := "John"
 
 	srv.ServeHTTP(httptest.NewRecorder(), newPostAppendReq(worker))

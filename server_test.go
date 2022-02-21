@@ -30,7 +30,7 @@ func TestGETPizzas(t *testing.T) {
 		},
 		nil,
 	}
-	server := &ProjectManagementServer{&store}
+	server := NewPMServer(&store)
 
 	t.Run("returns John's done tasks", func(t *testing.T) {
 		request := newGetTasksRequest("John")
@@ -67,7 +67,7 @@ func TestStoreDone(t *testing.T) {
 		map[string]int{},
 		nil,
 	}
-	server := &ProjectManagementServer{&store}
+	server := NewPMServer(&store)
 
 	t.Run("it records wins on POST", func(t *testing.T) {
 		worker := "John"
@@ -86,6 +86,21 @@ func TestStoreDone(t *testing.T) {
 		if store.doneCalls[0] != worker {
 			t.Errorf("did not store correct winner got %q want %q", store.doneCalls[0], worker)
 		}
+	})
+}
+
+//server_test.go
+func TestLeague(t *testing.T) {
+	store := StubPMStore{}
+	server := NewPMServer(&store)
+
+	t.Run("it returns 200 on /project", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/project", nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusOK)
 	})
 }
 
