@@ -12,22 +12,19 @@ type ProjectManagementStore interface {
 }
 
 type ProjectManagementServer struct {
-	store  ProjectManagementStore
-	router *http.ServeMux
+	store ProjectManagementStore
+	http.Handler
 }
 
 func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
-	p := &ProjectManagementServer{
-		store,
-		http.NewServeMux(),
-	}
-	p.router.Handle("/project", http.HandlerFunc(p.projectHandler))
-	p.router.Handle("/workers/", http.HandlerFunc(p.workersHandler))
-	return p
-}
+	p := new(ProjectManagementServer)
+	p.store = store
 
-func (p *ProjectManagementServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	p.router.ServeHTTP(w, r)
+	router := http.NewServeMux()
+	router.Handle("/project", http.HandlerFunc(p.projectHandler))
+	router.Handle("/workers/", http.HandlerFunc(p.workersHandler))
+	p.Handler = router
+	return p
 }
 
 func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
