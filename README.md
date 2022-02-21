@@ -13,8 +13,29 @@ Everything is done with the TDD method. That's why in packages you can see some 
 # How to use it
 Build it, run it and then use `curl` to test it out.
 - `curl -X POST http://localhost:4673/workers/John` - will append one completed task to the John
-- Check tasks with `curl http://localhost:4673/workers/John` 
+- Check tasks with `curl http://localhost:4673/workers/John`
+- Get JSON info about project with `curl http://localhost:4673/project`
 
-# Future updates
-- GET JSON
-- Store the variables to the file
+# Pretty JSON
+For pretty output of JSON I'm using `json.SetIndent("", "    ")`
+```go
+func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("content-type", "application/json")
+    enc := json.NewEncoder(w)
+    enc.SetIndent("", "    ")
+    enc.Encode(p.store.GetProjectInfo())
+}
+```
+# Go embedding
+For routing purposes I'm using `http.ServeMux`, but actually I can embed `http.Handler` so I shouldn't implement `ServeHTTP`
+```go
+type ProjectManagementServer struct {
+	store ProjectManagementStore
+	http.Handler
+}
+```
+
+# Storage
+`fs_store.go` is just a simple file storage implementation.
+
+File is saving in project src directory.

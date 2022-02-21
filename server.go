@@ -40,7 +40,9 @@ func NewPMServer(store ProjectManagementStore) *ProjectManagementServer {
 // projectHandler handles /project endpoint
 func (p *ProjectManagementServer) projectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
-	json.NewEncoder(w).Encode(p.store.GetProjectInfo())
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	enc.Encode(p.store.GetProjectInfo())
 }
 
 // workersHandler handles /workers/ endpoint

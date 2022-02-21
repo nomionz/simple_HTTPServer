@@ -7,9 +7,10 @@ import (
 )
 
 func TestAppendingAndRetrieving(t *testing.T) {
-	file, rmFile := createTmpFile(t, "")
+	file, rmFile := createTmpFile(t, `[]`)
 	defer rmFile()
-	store := &FSStore{file}
+	store, err := NewFSStore(file)
+	assertNoError(t, err)
 	srv := NewPMServer(store)
 	worker := "John"
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -15,7 +14,8 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Chris", "DoneTasks": 33}]`)
 		defer rmFile()
 
-		store := FSStore{file}
+		store, err := NewFSStore(file)
+		assertNoError(t, err)
 
 		got := store.GetProjectInfo()
 
@@ -34,7 +34,8 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Chris", "DoneTasks": 33}]`)
 		defer rmFile()
 
-		store := FSStore{file}
+		store, err := NewFSStore(file)
+		assertNoError(t, err)
 
 		got := store.GetDoneTasks("John")
 		want := 10
@@ -48,7 +49,8 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Chris", "DoneTasks": 33}]`)
 		defer rmFile()
 
-		store := FSStore{file}
+		store, err := NewFSStore(file)
+		assertNoError(t, err)
 		store.Append("John")
 
 		got := store.GetDoneTasks("John")
@@ -61,13 +63,23 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "John", "DoneTasks": 10},
             {"Name": "Chris", "DoneTasks": 33}]`)
 		defer rmFile()
-		store := FSStore{file}
+		store, err := NewFSStore(file)
+		assertNoError(t, err)
 		store.Append("Steve")
 
 		got := store.GetDoneTasks("Steve")
 		want := 1
 		assertTasksEquals(t, got, want)
 
+	})
+
+	t.Run("works with an empty file", func(t *testing.T) {
+		file, rmFile := createTmpFile(t, "")
+		defer rmFile()
+
+		_, err := NewFSStore(file)
+
+		assertNoError(t, err)
 	})
 
 }
@@ -78,7 +90,7 @@ func assertTasksEquals(t testing.TB, got, want int) {
 	}
 }
 
-func createTmpFile(t testing.TB, data string) (io.ReadWriteSeeker, func()) {
+func createTmpFile(t testing.TB, data string) (*os.File, func()) {
 	t.Helper()
 
 	tmp, err := ioutil.TempFile("", "tmpFileForTest")
@@ -95,4 +107,11 @@ func createTmpFile(t testing.TB, data string) (io.ReadWriteSeeker, func()) {
 	}
 
 	return tmp, rmFile
+}
+
+func assertNoError(t testing.TB, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("didn't expect an error but got one %v", err)
+	}
 }
